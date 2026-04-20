@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import streamlit as st
 from google.cloud import bigquery
@@ -8,16 +7,15 @@ import dotenv
 
 dotenv.load_dotenv()
 
-PROJECT_ID = os.getenv("PROJECT_ID", "cryptovibes")
-SA_FILE = os.getenv("GCP_SERVICE_ACCOUNT_FILE", "")
+PROJECT_ID = st.secrets["PROJECT_ID"]
+CREDS = service_account.Credentials.from_service_account_info(
+    st.secrets["GCP_SERVICE_ACCOUNT_FILE"]
+)
 
 
 @st.cache_resource
 def get_client() -> bigquery.Client:
-    if SA_FILE and os.path.exists(SA_FILE):
-        creds = service_account.Credentials.from_service_account_file(SA_FILE)
-        return bigquery.Client(project=PROJECT_ID, credentials=creds)
-    return bigquery.Client(project=PROJECT_ID)
+    return bigquery.Client(project=PROJECT_ID, credentials=CREDS)
 
 
 def _run_query(sql: str) -> pd.DataFrame:

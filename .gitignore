@@ -215,3 +215,5 @@ logs/*.log
 *.tfstate.backup
 .terraform/
 secrets.toml
+*.json
+credentials.toml
