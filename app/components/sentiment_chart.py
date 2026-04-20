@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 from config import COLORS, FG_COLORS
 
-
 FG_ORDER = ["Extreme Fear", "Fear", "Neutral", "Greed", "Extreme Greed"]
 
 
@@ -11,13 +10,13 @@ def render_sentiment_distribution(df_fg: pd.DataFrame):
     c = COLORS
 
     st.markdown(
-        '<p class="cv-section-title">— Sentiment distribution</p>',
+        '<p class="cv-section-title">sentiment distribution</p>',
         unsafe_allow_html=True,
     )
 
     if df_fg.empty:
         st.markdown(
-            f'<div class="cv-card" style="text-align:center;padding:3rem;color:{c["text_muted"]}">no data</div>',
+            f'<p style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:{c["text_dim"]}">no data</p>',
             unsafe_allow_html=True,
         )
         return
@@ -27,67 +26,56 @@ def render_sentiment_distribution(df_fg: pd.DataFrame):
     pcts = (counts / total * 100).round(1)
 
     fig = go.Figure()
-
     fig.add_trace(
         go.Bar(
             x=pcts.values,
             y=pcts.index,
             orientation="h",
-            marker=dict(
-                color=[FG_COLORS[label] for label in pcts.index],
-                opacity=0.85,
-            ),
+            marker=dict(color=[FG_COLORS[label] for label in pcts.index], opacity=0.75),
             hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
             text=[f"{v:.0f}%" for v in pcts.values],
             textposition="outside",
-            textfont=dict(family="JetBrains Mono", size=9, color=c["text_muted"]),
+            textfont=dict(family="JetBrains Mono", size=8, color=c["text_dim"]),
         )
     )
 
     fig.update_layout(
-        height=200,
+        height=185,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="JetBrains Mono, monospace", size=9, color=c["text_muted"]),
+        font=dict(family="JetBrains Mono, monospace", size=8, color=c["text_dim"]),
         showlegend=False,
-        margin=dict(l=0, r=40, t=4, b=0),
+        margin=dict(l=0, r=36, t=0, b=0),
         xaxis=dict(
             showgrid=False,
             zeroline=False,
             showticklabels=False,
-            range=[0, pcts.max() * 1.25],
+            range=[0, pcts.max() * 1.3],
         ),
         yaxis=dict(
             gridcolor=c["border"],
-            tickfont=dict(family="JetBrains Mono", size=9, color=c["text_muted"]),
+            tickfont=dict(family="JetBrains Mono", size=8, color=c["text_dim"]),
             showline=False,
         ),
-        bargap=0.3,
+        bargap=0.35,
     )
 
     st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
+    # Dominant mood — inline, no card
     dominant = counts.idxmax()
     dom_color = FG_COLORS.get(dominant, c["text_muted"])
     dom_pct = pcts[dominant]
 
     st.markdown(
         f"""
-<div class="cv-card" style="margin-top:0.5rem">
-    <p class="cv-card-label">DOMINANT MOOD</p>
-    <p class="cv-card-value" style="font-size:1.4rem;color:{dom_color}">{dominant}</p>
-    <p class="cv-card-sub">{dom_pct:.1f}% of days · {counts[dominant]} total</p>
-    <div class="cv-bar-track">
-        <div class="cv-bar-fill" style="width:{dom_pct:.0f}%;background:{dom_color};box-shadow:0 0 6px {dom_color};"></div>
-    </div>
+<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid {c["border"]}">
+    <div class="cv-kpi-label">dominant mood</div>
+    <div style="font-family:'Quantico',sans-serif;font-size:1.2rem;color:{dom_color};margin:0.3rem 0 0.2rem">{dominant}</div>
+    <div class="cv-kpi-sub">{dom_pct:.1f}% · {counts[dominant]} days</div>
+    <div class="cv-kpi-bar" style="margin-top:0.6rem"><div class="cv-kpi-bar-fill" style="width:{dom_pct:.0f}%;background:{dom_color}"></div></div>
 </div>
+<p style="font-family:JetBrains Mono,monospace;font-size:0.52rem;color:{c["text_dim"]};margin-top:0.6rem">{total} days analyzed</p>
 """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        f'<p style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{c["text_dim"]};margin-top:0.5rem">'
-        f"{total} days analyzed"
-        f"</p>",
         unsafe_allow_html=True,
     )

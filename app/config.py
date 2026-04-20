@@ -62,144 +62,166 @@ html, body, [data-testid="stAppViewContainer"] {{
     font-family: 'JetBrains Mono', monospace;
 }}
 
-.stMainBlockContainer {{ padding: 1rem 3rem 3rem 3rem !important;}}
+.stMainBlockContainer {{ padding: 0 3.5rem 4rem 3.5rem !important; }}
 
 [data-testid="stSidebar"] {{
-    background: {c["surface"]} !important;
+    background: {c["bg"]} !important;
     border-right: 1px solid {c["border"]} !important;
 }}
 
-[data-testid="stSidebarHeader"] {{
-    height: 10px;
-}}
+[data-testid="stSidebarHeader"] {{ height: 10px; }}
 
 [data-testid="stSidebarUserContent"] * {{
     color: {c["text"]} !important;
     font-family: 'JetBrains Mono', monospace !important;
 }}
 
-section[data-testid="stSidebar"] > div {{
-    padding-top: 2rem;
-}}
+section[data-testid="stSidebar"] > div {{ padding-top: 2.5rem; }}
 
 .cv-header {{
     display: flex;
     align-items: baseline;
-    gap: 1rem;
-    padding: 1.5rem 0 1rem 0;
-    border-bottom: 1px solid {c["border"]};
-    margin-bottom: 1.5rem;
+    justify-content: space-between;
+    padding: 2.5rem 0 1.5rem 0;
+}}
+
+.cv-header-left {{
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
 }}
 
 .cv-logo {{
     font-family: 'Quantico', sans-serif;
-    font-weight: 800;
-    font-size: 1.6rem;
+    font-weight: 700;
+    font-size: 1.3rem;
     color: {c["accent"]};
-    letter-spacing: -0.02em;
-    text-shadow: 0 0 20px {c["accent_glow"]};
+    letter-spacing: 0.04em;
 }}
 
 .cv-tagline {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: {c["text_muted"]};
+    font-size: 0.6rem;
+    color: {c["text_dim"]};
     letter-spacing: 0.1em;
-    text-transform: lowercase;
 }}
 
-.cv-divider {{
+.cv-header-date {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    color: {c["text_dim"]};
+    letter-spacing: 0.08em;
+}}
+
+.cv-line {{
     height: 1px;
     background: {c["border"]};
-    margin: 1.5rem 0;
+    margin: 0 0 2.5rem 0;
 }}
 
-.cv-card {{
-    background: {c["surface"]};
-    border: 1px solid {c["border"]};
-    border-radius: 8px;
-    padding: 2rem 1.5rem;
-    position: relative;
-    overflow: hidden;
-    height: auto;
-}}
-
-.cv-card::before {{
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
+.cv-line-sm {{
     height: 1px;
-    background: linear-gradient(90deg, transparent, {c["accent_dim"]}, transparent);
+    background: {c["border"]};
+    margin: 2rem 0;
 }}
 
-.cv-card-label {{
+.cv-label {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem !important;
-    color: {c["text_muted"]};
-    letter-spacing: 0.12em;
+    font-size: 0.56rem;
+    color: {c["text_dim"]};
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    margin-bottom: 0.4rem;
+    margin-bottom: 1.75rem;
 }}
 
-.cv-card-value {{
-    font-family: "Quantico", sans-serif;
+.cv-kpi-row {{
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+}}
+
+.cv-kpi-item {{
+    flex: 1;
+    padding: 0 2rem 0 0;
+    border-right: 1px solid {c["border"]};
+    margin-right: 2rem;
+}}
+
+.cv-kpi-item:last-child {{
+    border-right: none;
+    margin-right: 0;
+    padding-right: 0;
+}}
+
+.cv-kpi-label {{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.56rem;
+    color: {c["text_dim"]};
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}}
+
+.cv-kpi-value {{
+    font-family: 'Quantico', sans-serif;
     font-weight: 400;
-    font-size: 1.5rem !important;
+    font-size: 1.9rem;
     line-height: 1;
     color: {c["text"]};
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
 }}
 
-.cv-card-value.positive {{ color: {c["accent"]}; }}
-.cv-card-value.negative {{ color: {c["fear"]}; }}
+.cv-kpi-value.positive {{ color: {c["accent"]}; }}
+.cv-kpi-value.negative {{ color: {c["fear"]}; }}
 
-.cv-card-sub {{
+.cv-kpi-sub {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem !important;
+    font-size: 0.58rem;
     color: {c["text_muted"]};
-    margin-top: 0.5rem;
+    margin-top: 0.2rem;
 }}
 
-.cv-bar-track {{
-    background: {c["surface2"]};
-    border-radius: 2px;
-    height: 3px;
-    margin-top: 0.75rem;
+.cv-kpi-bar {{
+    height: 2px;
+    background: {c["border"]};
+    margin-top: 0.9rem;
+    border-radius: 1px;
     overflow: hidden;
 }}
 
-.cv-bar-fill {{
+.cv-kpi-bar-fill {{
     height: 100%;
-    border-radius: 2px;
+    border-radius: 1px;
     background: {c["accent"]};
-    box-shadow: 0 0 6px {c["accent"]};
 }}
 
-.cv-bar-fill.fear-bar {{ background: {c["fear"]}; box-shadow: 0 0 6px {c["fear"]}; }}
+.cv-kpi-bar-fill.neg {{ background: {c["fear"]}; }}
 
-.cv-fg-badge {{
+.cv-badge {{
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 20px;
-    letter-spacing: 0.08em;
-    margin-top: 0.5rem;
+    font-size: 0.52rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
 }}
 
 .cv-section-title {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: {c["text_muted"]};
+    font-size: 0.56rem;
+    color: {c["text_dim"]};
     letter-spacing: 0.15em;
     text-transform: uppercase;
     margin-bottom: 0.75rem;
 }}
 
 .stSelectbox > div > div {{
-    background: {c["surface"]} !important;
+    background: {c["bg"]} !important;
     border: 1px solid {c["border"]} !important;
-    border-radius: 8px !important;
+    border-radius: 3px !important;
     color: {c["text"]} !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 0.8rem !important;
@@ -207,40 +229,33 @@ section[data-testid="stSidebar"] > div {{
 
 .stSelectbox label {{
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.65rem !important;
-    color: {c["text_muted"]} !important;
+    font-size: 0.56rem !important;
+    color: {c["text_dim"]} !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.12em !important;
 }}
 
-.stSlider > div > div > div {{
-    color: {c["accent"]} !important;
-}}
+.stSlider > div > div > div {{ color: {c["accent"]} !important; }}
 
 .stSlider label {{
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.65rem !important;
-    color: {c["text_muted"]} !important;
+    font-size: 0.56rem !important;
+    color: {c["text_dim"]} !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.12em !important;
 }}
 
-div[data-testid="stMarkdownContainer"] > p{{
+div[data-testid="stMarkdownContainer"] > p {{
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.65rem !important;
-    color: {c["text_muted"]} !important;
+    font-size: 0.56rem !important;
+    color: {c["text_dim"]} !important;
     text-transform: uppercase !important;
     letter-spacing: 0.1em !important;
 }}
 
-div[data-testid="metric-container"] {{
-    display: none;
-}}
+div[data-testid="metric-container"] {{ display: none; }}
 
-
-/*footer, #MainMenu, header {{ visibility: hidden; }}*/
-
-::-webkit-scrollbar {{ width: 4px; background: {c["bg"]}; }}
+::-webkit-scrollbar {{ width: 3px; background: {c["bg"]}; }}
 ::-webkit-scrollbar-thumb {{ background: {c["border"]}; border-radius: 2px; }}
 </style>
 """,

@@ -10,23 +10,23 @@ def render_sidebar() -> dict:
             f"""
 <div style="
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: {c["text_muted"]};
+    font-size: 0.58rem;
+    color: {c["text_dim"]};
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid {c["border"]};
 ">
     ◈ CryptoVibes<br>
-    <span style="color:{c["text_dim"]}">market sentiment tracker</span>
+    <span style="color:{c["text_dim"]};letter-spacing:0.08em;">market sentiment tracker</span>
 </div>
 """,
             unsafe_allow_html=True,
         )
 
         st.markdown(
-            '<p class="cv-section-title">— Primary Coin</p>',
+            '<p class="cv-section-title">primary coin</p>',
             unsafe_allow_html=True,
         )
 
@@ -39,7 +39,7 @@ def render_sidebar() -> dict:
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<p class="cv-section-title">— Compare With</p>',
+            '<p class="cv-section-title">compare with</p>',
             unsafe_allow_html=True,
         )
 
@@ -51,12 +51,12 @@ def render_sidebar() -> dict:
             format_func=lambda x: COIN_LABELS[x],
             label_visibility="collapsed",
             max_selections=6,
-            placeholder="Select up to 6 coins...",
+            placeholder="up to 6 coins...",
         )
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<p class="cv-section-title">— Time Range</p>',
+            '<p class="cv-section-title">time range</p>',
             unsafe_allow_html=True,
         )
 
@@ -86,18 +86,16 @@ def render_sidebar() -> dict:
             f"""
 <div style="
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: {c["text_dim"]};
     letter-spacing: 0.08em;
-    line-height: 1.8;
+    line-height: 2;
     padding-top: 1rem;
     border-top: 1px solid {c["border"]};
 ">
-    Data sources<br>
-    <span style="color:{c["text_muted"]}">yfinance (historical)</span><br>
-    <span style="color:{c["text_muted"]}">CoinGecko API (daily)</span><br>
-    <span style="color:{c["text_muted"]}">Alternative.me F&G</span><br><br>
-    Updated daily at 00:00 UTC
+    sources<br>
+    yfinance · CoinGecko · Alternative.me<br><br>
+    updated daily 00:00 UTC
 </div>
 """,
             unsafe_allow_html=True,

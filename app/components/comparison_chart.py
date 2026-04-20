@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 from config import COLORS, COIN_LABELS
 
-# Paleta de colores para cada coin en el comparison chart
 COIN_COLORS = {
     "bitcoin": "#F7931A",
     "ethereum": "#979797",
@@ -33,7 +32,7 @@ def render_comparison_chart(
         return
 
     st.markdown(
-        '<p class="cv-section-title">— Cumulative return comparison</p>',
+        '<p class="cv-section-title">cumulative return comparison</p>',
         unsafe_allow_html=True,
     )
 
@@ -46,7 +45,6 @@ def render_comparison_chart(
         if df_coin.empty or len(df_coin) < 2:
             continue
 
-        # Retorno acumulado desde el primer dia del rango
         base_price = df_coin["close_price_usd"].iloc[0]
         df_coin["cumulative_return"] = (
             df_coin["close_price_usd"] / base_price - 1
@@ -64,38 +62,20 @@ def render_comparison_chart(
                 name=label,
                 line=dict(
                     color=color,
-                    width=2.5 if is_primary else 1.5,
+                    width=2 if is_primary else 1.2,
                     dash="solid" if is_primary else "dot",
                 ),
-                hovertemplate=f"<b>{label}</b><br>%{{x|%b %d, %Y}}<br>Return: %{{y:+.2f}}%<extra></extra>",
+                hovertemplate=f"<b>{label}</b><br>%{{x|%b %d, %Y}}<br>%{{y:+.2f}}%<extra></extra>",
             )
         )
 
-    fig.add_hline(
-        y=0,
-        line_color=c["border"],
-        line_width=1,
-        line_dash="solid",
-    )
-
-    fig.add_hrect(
-        y0=0,
-        y1=fig.data[0].y.max() * 1.1 if fig.data else 100,
-        fillcolor="rgba(57,255,20,0.03)",
-        line_width=0,
-    )
-    fig.add_hrect(
-        y0=fig.data[0].y.min() * 1.1 if fig.data else -100,
-        y1=0,
-        fillcolor="rgba(255,68,68,0.03)",
-        line_width=0,
-    )
+    fig.add_hline(y=0, line_color=c["border"], line_width=1)
 
     fig.update_layout(
-        height=280,
+        height=260,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="JetBrains Mono, monospace", size=10, color=c["text_muted"]),
+        font=dict(family="JetBrains Mono, monospace", size=9, color=c["text_dim"]),
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -103,16 +83,16 @@ def render_comparison_chart(
             y=1.02,
             xanchor="left",
             x=0,
-            font=dict(family="JetBrains Mono", size=9, color=c["text_muted"]),
+            font=dict(family="JetBrains Mono", size=8, color=c["text_muted"]),
             bgcolor="rgba(0,0,0,0)",
             borderwidth=0,
         ),
-        margin=dict(l=0, r=0, t=30, b=0),
+        margin=dict(l=0, r=0, t=28, b=0),
         hovermode="x unified",
         hoverlabel=dict(
             bgcolor=c["surface"],
             bordercolor=c["border"],
-            font=dict(family="JetBrains Mono", size=11, color=c["text"]),
+            font=dict(family="JetBrains Mono", size=10, color=c["text"]),
         ),
     )
 
@@ -123,12 +103,8 @@ def render_comparison_chart(
         tickfont=dict(family="JetBrains Mono", size=9, color=c["text_dim"]),
         showline=False,
     )
-
     fig.update_xaxes(**axis_style)
-    fig.update_yaxes(
-        **axis_style,
-        ticksuffix="%",
-    )
+    fig.update_yaxes(**axis_style, ticksuffix="%")
 
     st.plotly_chart(
         fig,
@@ -140,6 +116,7 @@ def render_comparison_chart(
         },
     )
 
+    # Summary row — inline stats, no cards
     rows = []
     for coin_id in all_coins:
         df_coin = (
@@ -173,18 +150,10 @@ def render_comparison_chart(
             with cols[i]:
                 st.markdown(
                     f"""
-<div style="
-    background: {c["surface"]};
-    border: 1px solid {color}44;
-    border-top: 2px solid {color};
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    text-align: center;
-">
-    <p style="font-family:JetBrains Mono,monospace;font-size:0.6rem;color:{color};margin:0;letter-spacing:0.1em">{row["coin"]}</p>
-    <p style="font-family:Quantico,sans-serif;font-weight:400;font-size:1.2rem;color:{ret_color};margin:0.25rem 0 0">{row["return"]}</p>
-    <p style="font-family:JetBrains Mono,monospace;font-size:0.55rem;color:{c["text_dim"]};margin:0.2rem 0 0">{row["start"]} → {row["end"]}</p>
-</div>
-""",
+<div style="padding:0.6rem 0;border-top:2px solid {color};margin-top:0.75rem">
+    <div style="font-family:JetBrains Mono,monospace;font-size:0.54rem;color:{color};letter-spacing:0.1em;margin-bottom:0.3rem">{row["coin"]}</div>
+    <div style="font-family:'Quantico',sans-serif;font-size:1.3rem;color:{ret_color};margin-bottom:0.2rem">{row["return"]}</div>
+    <div style="font-family:JetBrains Mono,monospace;font-size:0.52rem;color:{c["text_dim"]}">{row["start"]} → {row["end"]}</div>
+</div>""",
                     unsafe_allow_html=True,
                 )
