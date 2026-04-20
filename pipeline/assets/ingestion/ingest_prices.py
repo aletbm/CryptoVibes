@@ -124,14 +124,9 @@ COINS = {
 COIN_IDS = ",".join(COINS.keys())
 HEADERS = {"x-cg-demo-api-key": API_KEY}
 
-SCHEMA_COLUMNS = [
-    "id",
-    "symbol",
-    "name",
-    "image",
+FLOAT_COLUMNS = [
     "current_price",
     "market_cap",
-    "market_cap_rank",
     "fully_diluted_valuation",
     "total_volume",
     "high_24h",
@@ -145,15 +140,50 @@ SCHEMA_COLUMNS = [
     "max_supply",
     "ath",
     "ath_change_percentage",
-    "ath_date",
     "atl",
     "atl_change_percentage",
-    "atl_date",
     "roi",
-    "last_updated",
     "price_change_percentage_24h_in_currency",
+]
+
+INT_COLUMNS = ["market_cap_rank"]
+
+DATE_COLUMNS = [
+    "ath_date",
+    "atl_date",
+    "last_updated",
     "ingested_at",
 ]
+
+SCHEMA_COLUMNS = [
+    "id",
+    "symbol",
+    "name",
+    "image",
+    *FLOAT_COLUMNS[:2],
+    "market_cap_rank",
+    *FLOAT_COLUMNS[2:],
+    "ath_date",
+    "atl_date",
+    "last_updated",
+    "ingested_at",
+]
+
+
+def enforce_schema(df: pd.DataFrame) -> pd.DataFrame:
+    for col in FLOAT_COLUMNS:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Float64")
+
+    for col in INT_COLUMNS:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+
+    for col in DATE_COLUMNS:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce", utc=True)
+
+    return df.reindex(columns=SCHEMA_COLUMNS)
 
 
 def is_first_run(client: bigquery.Client, table_id: str) -> bool:
@@ -169,7 +199,7 @@ def fetch_historical_yfinance() -> pd.DataFrame:
     all_rows = []
 
     for coin_id, (symbol, name, ticker) in COINS.items():
-        print(f"  yfinance backfill: {symbol} ({ticker})...")
+        print(f"yfinance backfill: {symbol}")
         try:
             df = yf.download(
                 ticker,
@@ -181,10 +211,8 @@ def fetch_historical_yfinance() -> pd.DataFrame:
             )
 
             if df.empty:
-                print(f"  Warning: no data for {ticker}, skipping")
                 continue
 
-            # yfinance puede devolver MultiIndex cuando se descarga un solo ticker
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
 
@@ -194,6 +222,7 @@ def fetch_historical_yfinance() -> pd.DataFrame:
             for _, row in df.iterrows():
                 close = float(row.get("close", 0))
                 open_ = float(row.get("open", 0))
+
                 all_rows.append(
                     {
                         "id": coin_id,
@@ -201,9 +230,6 @@ def fetch_historical_yfinance() -> pd.DataFrame:
                         "name": name,
                         "image": None,
                         "current_price": close,
-                        "market_cap": None,
-                        "market_cap_rank": None,
-                        "fully_diluted_valuation": None,
                         "total_volume": float(row.get("volume", 0)) * close,
                         "high_24h": float(row.get("high", 0)),
                         "low_24h": float(row.get("low", 0)),
@@ -211,63 +237,23 @@ def fetch_historical_yfinance() -> pd.DataFrame:
                         "price_change_percentage_24h": ((close - open_) / open_ * 100)
                         if open_
                         else None,
-                        "market_cap_change_24h": None,
-                        "market_cap_change_percentage_24h": None,
-                        "circulating_supply": None,
-                        "total_supply": None,
-                        "max_supply": None,
-                        "ath": None,
-                        "ath_change_percentage": None,
-                        "ath_date": None,
-                        "atl": None,
-                        "atl_change_percentage": None,
-                        "atl_date": None,
-                        "roi": None,
-                        "last_updated": pd.Timestamp(row["date"]).tz_localize("UTC")
-                        if pd.Timestamp(row["date"]).tzinfo is None
-                        else pd.Timestamp(row["date"]),
                         "price_change_percentage_24h_in_currency": (
                             (close - open_) / open_ * 100
                         )
                         if open_
                         else None,
+                        "last_updated": row["date"],
                         "ingested_at": ingested_at,
                     }
                 )
 
-            print(f"    {len(df)} days retrieved")
-
         except Exception as e:
-            print(f"  Error fetching {ticker}: {e}")
-            continue
+            print(f"Error fetching {ticker}: {e}")
 
-    result = pd.DataFrame(all_rows, columns=SCHEMA_COLUMNS)
-    result["market_cap"] = result["market_cap"].astype("Float64")
-    result["market_cap_rank"] = result["market_cap_rank"].astype("Int64")
-    result["fully_diluted_valuation"] = result["fully_diluted_valuation"].astype(
-        "Float64"
-    )
-    result["market_cap_change_24h"] = result["market_cap_change_24h"].astype("Float64")
-    result["market_cap_change_percentage_24h"] = result[
-        "market_cap_change_percentage_24h"
-    ].astype("Float64")
-    result["circulating_supply"] = result["circulating_supply"].astype("Float64")
-    result["total_supply"] = result["total_supply"].astype("Float64")
-    result["max_supply"] = result["max_supply"].astype("Float64")
-    result["ath"] = result["ath"].astype("Float64")
-    result["ath_change_percentage"] = result["ath_change_percentage"].astype("Float64")
-    result["ath_date"] = pd.to_datetime(result["ath_date"], utc=True)
-    result["atl"] = result["atl"].astype("Float64")
-    result["atl_change_percentage"] = result["atl_change_percentage"].astype("Float64")
-    result["atl_date"] = pd.to_datetime(result["atl_date"], utc=True)
-    result["roi"] = result["roi"].astype("Float64")
-    result["image"] = result["image"].astype("object")
-    print(f"Historical backfill complete: {len(result)} total records")
-    return result
+    return enforce_schema(pd.DataFrame(all_rows))
 
 
 def fetch_daily_coingecko() -> pd.DataFrame:
-    """Snapshot diario completo con todos los campos via CoinGecko."""
     url = "https://api.coingecko.com/api/v3/coins/markets"
     params = {
         "vs_currency": "usd",
@@ -278,23 +264,17 @@ def fetch_daily_coingecko() -> pd.DataFrame:
 
     resp = requests.get(url, headers=HEADERS, params=params)
     resp.raise_for_status()
-    data = resp.json()
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(resp.json())
     if df.empty:
-        raise ValueError("No data returned from CoinGecko markets API")
+        raise ValueError("No data returned from CoinGecko")
 
     df["roi"] = df["roi"].apply(
         lambda x: x.get("percentage") if isinstance(x, dict) else None
     )
-    df["ath_date"] = pd.to_datetime(df["ath_date"])
-    df["atl_date"] = pd.to_datetime(df["atl_date"])
-    df["last_updated"] = pd.to_datetime(df["last_updated"])
     df["ingested_at"] = datetime.now(timezone.utc)
 
-    df = df.reindex(columns=SCHEMA_COLUMNS)
-    print(f"Daily ingestion: {len(df)} records from CoinGecko")
-    return df
+    return enforce_schema(df)
 
 
 def materialize() -> pd.DataFrame:
@@ -302,10 +282,8 @@ def materialize() -> pd.DataFrame:
     table_id = "raw.prices"
 
     if is_first_run(client, table_id):
-        print(
-            "First run detected — running yfinance historical backfill from 2018-02-01"
-        )
+        print("First run: historical backfill")
         return fetch_historical_yfinance()
-    else:
-        print("Incremental run — fetching daily snapshot from CoinGecko")
-        return fetch_daily_coingecko()
+
+    print("Incremental run: CoinGecko snapshot")
+    return fetch_daily_coingecko()
