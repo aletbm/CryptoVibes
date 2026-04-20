@@ -16,6 +16,20 @@ COIN_COLORS = {
     "polkadot": "#E6007A",
 }
 
+# CoinGecko small logos (PNG) — served via CDN
+COIN_LOGOS = {
+    "bitcoin": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
+    "ethereum": "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+    "binancecoin": "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png",
+    "solana": "https://assets.coingecko.com/coins/images/4128/small/solana.png",
+    "ripple": "https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png",
+    "dogecoin": "https://assets.coingecko.com/coins/images/5/small/dogecoin.png",
+    "cardano": "https://assets.coingecko.com/coins/images/975/small/cardano.png",
+    "avalanche-2": "https://assets.coingecko.com/coins/images/12559/small/Avalanche_Circle_RedWhite_Trans.png",
+    "shiba-inu": "https://assets.coingecko.com/coins/images/11939/small/shiba.png",
+    "polkadot": "https://assets.coingecko.com/coins/images/12171/small/polkadot.png",
+}
+
 
 def render_comparison_chart(
     df_mart: pd.DataFrame, primary_coin: str, compare_coins: list
@@ -38,6 +52,9 @@ def render_comparison_chart(
 
     fig = go.Figure()
 
+    # Collect last (x, y) per coin for logo placement
+    logo_anchors = []
+
     for coin_id in all_coins:
         df_coin = df[df["coin_id"] == coin_id].sort_values("price_date").copy()
         df_coin = df_coin.dropna(subset=["close_price_usd"])
@@ -53,6 +70,10 @@ def render_comparison_chart(
         label = COIN_LABELS.get(coin_id, coin_id)
         color = COIN_COLORS.get(coin_id, c["text_muted"])
         is_primary = coin_id == primary_coin
+
+        last_x = df_coin["price_date"].iloc[-1]
+        last_y = df_coin["cumulative_return"].iloc[-1]
+        logo_anchors.append((coin_id, last_x, last_y))
 
         fig.add_trace(
             go.Scatter(
@@ -71,7 +92,54 @@ def render_comparison_chart(
 
     fig.add_hline(y=0, line_color=c["border"], line_width=1)
 
+    # ── Logo images at end of each line ──────────────────────────────────────
+    all_dates = df["price_date"].dropna()
+    x_min = all_dates.min()
+    x_max = all_dates.max()
+    date_range_days = (x_max - x_min).days if hasattr((x_max - x_min), "days") else 30
+
+    # Plotly date axes use milliseconds internally for sizex / x in layout.images
+    MS_PER_DAY = 86_400_000
+    logo_size_ms = max(int(date_range_days * 0.048), 2) * MS_PER_DAY
+
+    # y-axis span estimate
+    all_returns = []
+    for coin_id in all_coins:
+        dc = df[df["coin_id"] == coin_id].dropna(subset=["close_price_usd"])
+        if len(dc) < 2:
+            continue
+        base = dc["close_price_usd"].iloc[0]
+        all_returns += list((dc["close_price_usd"] / base - 1) * 100)
+
+    y_span = (max(all_returns) - min(all_returns)) if all_returns else 100
+    logo_size_y = y_span * 0.02  # 10% of visible y range
+
+    layout_images = []
+    for coin_id, last_x, last_y in logo_anchors:
+        logo_url = COIN_LOGOS.get(coin_id)
+        if not logo_url:
+            continue
+        # Convert timestamp to ms for Plotly
+        last_x_ms = int(pd.Timestamp(last_x).timestamp() * 1000)
+        layout_images.append(
+            dict(
+                source=logo_url,
+                xref="x",
+                yref="y",
+                x=last_x_ms
+                + logo_size_ms * 0.0,  # center the logo just past the last point
+                y=last_y,
+                sizex=logo_size_ms,
+                sizey=logo_size_y,
+                xanchor="center",
+                yanchor="middle",
+                layer="above",
+                sizing="contain",
+            )
+        )
+
     fig.update_layout(
+        images=layout_images,
         height=260,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -87,7 +155,7 @@ def render_comparison_chart(
             bgcolor="rgba(0,0,0,0)",
             borderwidth=0,
         ),
-        margin=dict(l=0, r=0, t=28, b=0),
+        margin=dict(l=0, r=44, t=28, b=0),  # extra right margin so logos aren't clipped
         hovermode="x unified",
         hoverlabel=dict(
             bgcolor=c["surface"],
@@ -105,6 +173,11 @@ def render_comparison_chart(
     )
     fig.update_xaxes(**axis_style)
     fig.update_yaxes(**axis_style, ticksuffix="%")
+
+    # Extend x-axis range to give room for logos (use ms timestamps)
+    x_min_ms = int(pd.Timestamp(x_min).timestamp() * 1000)
+    x_max_ms = int(pd.Timestamp(x_max).timestamp() * 1000)
+    fig.update_xaxes(range=[x_min_ms, x_max_ms + logo_size_ms * 2.2])
 
     st.plotly_chart(
         fig,
