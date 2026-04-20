@@ -1,6 +1,24 @@
-# CryptoVibes
+<div align="center">
+    <img width="400px" src="./docs/images/cryptovibes_logo.png">
+    <h2>Crypto Sentiment Analytics Pipeline</h2>
+    <strong>
+        End-to-end batch pipeline for analyzing the relationship between cryptocurrency price movements and the Fear & Greed Index — from raw API ingestion to an interactive cloud dashboard.
+    </strong>
+    <br><br>
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white">
+    <img src="https://img.shields.io/badge/BigQuery-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white">
+    <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white">
+    <img src="https://img.shields.io/badge/Bruin-F57C00?style=for-the-badge&logoColor=white">
+    <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white">
+    <img src="https://img.shields.io/badge/uv-000000?style=for-the-badge&logo=astral&logoColor=white">
+    <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
+    <img src="https://img.shields.io/badge/Ruff-D7FF64?style=for-the-badge&logo=ruff&logoColor=black">
+</div>
 
-> Does the crypto market actually follow the Fear & Greed Index?
+---
+
+
+**Does the crypto market actually follow the Fear & Greed Index?**
 
 CryptoVibes is an end-to-end batch data pipeline that ingests daily cryptocurrency prices (CoinGecko and yfinance) and market sentiment (Fear & Greed Index), transforms the data through a layered architecture in BigQuery, and visualizes insights through a Streamlit dashboard.
 
@@ -10,37 +28,32 @@ CryptoVibes is an end-to-end batch data pipeline that ingests daily cryptocurren
 
 ---
 
-## Problem Statement
+### Problem Statement
 
-The crypto market is driven by emotion. The Fear & Greed Index attempts to quantify that emotion, but does price actually follow sentiment? CryptoVibes answers this question by tracking the top 10 cryptocurrencies (BTC, ETH, BNB, SOL, XRP, DOGE, ADA, AVAX, SHIB, DOT) alongside daily sentiment data, exposing misalignments, patterns, and which coins react most strongly to fear or greed.
+Cryptocurrency markets are highly influenced by investor sentiment, often driven by fear and greed rather than fundamentals.
+The **Fear & Greed Index** attempts to measure this sentiment, but it is not always clear whether market prices actually move in alignment with it.
+
+This project aims to analyze the relationship between **daily cryptocurrency price movements** and **market sentiment levels**, focusing on the top 10 cryptocurrencies by market capitalization.
+
+To do this, the pipeline ingests:
+
+* daily market prices from CoinGecko
+* historical price data from yFinance
+* daily sentiment scores from the Fear & Greed Index API
+
+The data is processed through a layered data warehouse architecture and exposed through a dashboard that helps answer:
+
+1. **How does price behavior evolve over time relative to market sentiment?**
+2. **Which cryptocurrencies align or diverge the most from the Fear & Greed Index?**
+
+This provides insights into whether market sentiment is a useful indicator of price behavior across different crypto assets.
+
 
 ---
 
 ## Architecture
 
-```
-CoinGecko API    yFinance (historical)    Fear & Greed API
-      │                  │                       │
-      ▼                  ▼                       ▼
- raw.prices         raw.prices_hist        raw.fear_greed
-      │                  │                       │
-      └──────────────────┘                       │
-                ▼                                ▼
-         staging.stg_prices          staging.stg_fear_greed
-                │                                │
-                ▼                                ▼
-       intermediate.int_daily_prices
-       intermediate.int_daily_sentiment
-                        │
-                        ▼
-          marts.mart_crypto_vs_sentiment
-                        │
-                        ▼
-              Streamlit Dashboard
-```
-
-<!-- Diagram: Pipeline architecture -->
-<!-- ![Architecture Diagram](docs/images/architecture.png) -->
+![architecture](docs/images/architecture.png)
 
 ---
 
