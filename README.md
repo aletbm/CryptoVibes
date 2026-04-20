@@ -2,7 +2,7 @@
     <img width="400px" src="./docs/images/cryptovibes_logo.png">
     <h2>Crypto Sentiment Analytics Pipeline</h2>
     <strong>
-        End-to-end batch pipeline for analyzing the relationship between cryptocurrency price movements and the Fear & Greed Index — from raw API ingestion to an interactive cloud dashboard.
+        End-to-end batch pipeline for analyzing the relationship between cryptocurrency price movements and the Fear & Greed Index, from raw API ingestion to an interactive cloud dashboard.
     </strong>
     <br><br>
     <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white">
@@ -59,21 +59,21 @@ This provides insights into whether market sentiment is a useful indicator of pr
 
 ## Cloud Infrastructure
 
-CryptoVibes runs entirely on managed cloud services — no self-hosted servers or local schedulers required.
+CryptoVibes runs entirely on managed cloud services (no self-hosted servers or local schedulers required).
 
-### Google Cloud Platform — BigQuery
+### Google Cloud Platform: BigQuery
 
 All data is stored and transformed in **BigQuery** on GCP. The four datasets (`raw`, `staging`, `intermediate`, `marts`) are provisioned automatically via Terraform IaC, ensuring reproducible, version-controlled infrastructure. The mart table is partitioned by `price_date` and clustered by `coin_id` and `fg_label` to minimize query costs and latency from the dashboard.
 
 ![Big Query](docs/images/bq.png)
 
-### Bruin Cloud — Pipeline Orchestration
+### Bruin Cloud: Pipeline Orchestration
 
-The ingestion and transformation pipeline runs on **[Bruin Cloud](https://getbruin.com)**, the managed execution environment for Bruin pipelines. The pipeline is scheduled to run daily, pulling fresh price and sentiment data from the APIs and propagating changes through all transformation layers automatically — no local Bruin CLI or manual trigger needed in production.
+The ingestion and transformation pipeline runs on **[Bruin Cloud](https://getbruin.com)**, the managed execution environment for Bruin pipelines. The pipeline is scheduled to run daily, pulling fresh price and sentiment data from the APIs and propagating changes through all transformation layers automatically (no local Bruin CLI or manual trigger needed in production).
 
 ![Bruin Cloud](docs/images/bruin_cloud.png) -->
 
-### Streamlit Community Cloud — Dashboard
+### Streamlit Community Cloud: Dashboard
 
 The dashboard is deployed and publicly accessible on **[Streamlit Community Cloud](https://streamlit.io/cloud)**. It connects directly to BigQuery using a service account stored as a Streamlit secret, so the data always reflects the latest pipeline run.
 
@@ -100,7 +100,7 @@ The dashboard is deployed and publicly accessible on **[Streamlit Community Clou
 | Source | Description | Update frequency |
 |---|---|---|
 | [CoinGecko API](https://docs.coingecko.com/v3.0.1/reference/coins-markets) | Current prices, market cap and volume for top 10 coins | Daily |
-| [yFinance](https://pypi.org/project/yfinance/) | Full historical OHLCV price data for top 10 coins — used for backfill on first run | On demand (backfill) |
+| [yFinance](https://pypi.org/project/yfinance/) | Full historical OHLCV price data for top 10 coins, used for backfill on first run | On demand (backfill) |
 | [Alternative.me Fear & Greed Index](https://alternative.me/crypto/fear-and-greed-index/) | Market sentiment score (0–100) with full historical backfill | Daily |
 
 ---
@@ -178,8 +178,8 @@ Cleaned, renamed, and typed data. Duplicates removed. One row per entity per sna
 
 | Table | Description |
 |---|---|
-| `staging.stg_prices` | Cleaned prices — renamed columns, filtered nulls, typed fields |
-| `staging.stg_fear_greed` | Deduplicated sentiment — one record per day, numeric category added |
+| `staging.stg_prices` | Cleaned prices: renamed columns, filtered nulls, typed fields |
+| `staging.stg_fear_greed` | Deduplicated sentiment: one record per day, numeric category added |
 
 ### Intermediate
 Business logic applied. Daily aggregations and window functions.
@@ -256,7 +256,7 @@ Dependencies are managed with [uv](https://docs.astral.sh/uv/). To sync all depe
 make install
 ```
 
-This runs `uv sync --all-groups` and resolves the lockfile (`uv.lock`) automatically. No need to create a virtualenv manually — uv handles it.
+This runs `uv sync --all-groups` and resolves the lockfile (`uv.lock`) automatically. No need to create a virtualenv manually, uv handles it.
 
 To run a one-off command inside the environment without activating it:
 
@@ -294,7 +294,7 @@ make infra-destroy
 
 ### 5. Configure Bruin
 
-Edit `.bruin.yml` with your GCP credentials. Bruin supports inline service account JSON via the `service_account_json` field — useful for cloud environments where a file path isn't available:
+Edit `.bruin.yml` with your GCP credentials. Bruin supports inline service account JSON via the `service_account_json` field, useful for cloud environments where a file path isn't available:
 
 ```yaml
 default_environment: default
@@ -336,7 +336,7 @@ environments:
 make run-pipeline
 ```
 
-This executes `scripts/run_bruin.bat` on Windows. On Linux / macOS, run directly:
+This executes `scripts/run_bruin.bat` on Windows. On Linux/macOS, run directly:
 
 ```bash
 bruin run pipeline --full-refresh --workers 1
