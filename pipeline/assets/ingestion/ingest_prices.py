@@ -105,6 +105,8 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timezone
 from google.cloud import bigquery
+from google.oauth2 import service_account
+import json
 
 API_KEY = os.environ["COINGECKO_API_KEY"]
 
@@ -278,7 +280,14 @@ def fetch_daily_coingecko() -> pd.DataFrame:
 
 
 def materialize() -> pd.DataFrame:
-    client = bigquery.Client()
+    connection = json.loads(os.environ["bigquery-default"])
+    service_account_info = json.loads(connection["service_account_json"])
+
+    credentials = service_account.Credentials.from_service_account_info(
+        service_account_info
+    )
+
+    client = bigquery.Client(project=connection["project_id"], credentials=credentials)
     table_id = "raw.prices"
 
     if is_first_run(client, table_id):

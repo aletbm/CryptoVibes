@@ -7,6 +7,10 @@ materialization:
   type: table
   strategy: append
 
+secrets:
+  - key: bigquery-default
+    inject_as: bigquery-default
+
 columns:
   - name: value
     type: integer
@@ -27,6 +31,9 @@ import requests
 import pandas as pd
 from datetime import datetime, timezone
 from google.cloud import bigquery
+from google.oauth2 import service_account
+import os
+import json
 
 URL = "https://api.alternative.me/fng/"
 
@@ -73,7 +80,15 @@ def remove_duplicates(
 
 
 def materialize():
-    client = bigquery.Client()
+    connection = json.loads(os.environ["bigquery-default"])
+    service_account_info = json.loads(connection["service_account_json"])
+
+    credentials = service_account.Credentials.from_service_account_info(
+        service_account_info
+    )
+
+    client = bigquery.Client(project=connection["project_id"], credentials=credentials)
+
     table_id = "raw.fear_greed"
 
     if is_first_run(client, table_id):
