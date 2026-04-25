@@ -71,7 +71,7 @@ All data is stored and transformed in **BigQuery** on GCP. The four datasets (`r
 
 The ingestion and transformation pipeline runs on **[Bruin Cloud](https://getbruin.com)**, the managed execution environment for Bruin pipelines. The pipeline is scheduled to run daily, pulling fresh price and sentiment data from the APIs and propagating changes through all transformation layers automatically (no local Bruin CLI or manual trigger needed in production).
 
-![Bruin Cloud](docs/images/bruin_cloud.png) -->
+![Bruin Cloud](docs/images/bruin_cloud.png)
 
 ### Streamlit Community Cloud: Dashboard
 
